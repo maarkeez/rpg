@@ -1,6 +1,6 @@
 import { Given, Then, When } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BattleProvider } from '../../../main/battle/adapters/presentation/BattleContext';
 import { BattleScreen } from '../../../main/battle/adapters/presentation/BattleScreen';
@@ -14,9 +14,11 @@ Given('the battle screen is displayed', async function () {
   await screen.findByText(/Player one turn/);
 });
 
-Then('the header shows {string}', function (headerText: string) {
-  const heading = screen.getByRole('heading', { level: 1 });
-  assert.equal(heading.textContent, headerText);
+Then('the header shows {string}', async function (headerText: string) {
+  await waitFor(() => {
+    const heading = screen.getByRole('heading', { level: 1 });
+    assert.equal(heading.textContent, headerText);
+  });
 });
 
 Then('the ally battle unit is visible on the battlefield', function () {
@@ -65,21 +67,22 @@ When('I target the enemy battle unit', async function () {
   await screen.findByTitle('80/100 HP');
 });
 
-Then('the enemy battle unit health is reduced', function () {
-  assert.ok(screen.getByTitle('80/100 HP'));
+Then('the enemy battle unit health is reduced', async function () {
+  await waitFor(() => {
+    assert.ok(screen.getByTitle('80/100 HP'));
+  });
 });
 
 When('I move the battle unit to an empty highlighted tile', async function () {
   const user = userEvent.setup();
   await user.click(screen.getByLabelText('tile-6-0'));
-  await screen.findByLabelText('tile-6-0');
 });
 
-Then('the ally battle unit is displayed on the new tile', function () {
-  const tile = screen.getByLabelText('tile-6-0');
-  assert.equal(tile.textContent, '👹');
-  const oldTile = screen.getByLabelText('tile-6-3');
-  assert.equal(oldTile.textContent, '');
+Then('the ally battle unit is displayed on the new tile', async function () {
+  await waitFor(() => {
+    assert.equal(screen.getByLabelText('tile-6-0').textContent, '👹');
+    assert.equal(screen.getByLabelText('tile-6-3').textContent, '');
+  });
 });
 
 Given('I click {string}', async function (buttonText: string) {
