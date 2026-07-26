@@ -1,6 +1,6 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
-import { getGreeting } from '../../src/logic/greeting';
+import { getGreeting } from '../../../main/logic/greeting';
 
 let name: string | undefined;
 let result: string;

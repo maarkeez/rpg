@@ -6,8 +6,13 @@ A React + TypeScript app built with Vite, deployed to GitHub Pages.
 ## Stack
 
 - **React + TypeScript** via Vite
-- **Cucumber.js** for testing business logic use cases (BDD, `features/`)
+- **Cucumber.js** for testing business logic use cases (BDD, `src/test/features/`)
 - **GitHub Actions** deploys `main` to GitHub Pages via `.github/workflows/deploy.yml`
+
+## Project structure
+
+- `src/main/` — production code (components, `logic/` business logic)
+- `src/test/` — tests (`features/` Cucumber scenarios and step definitions)
 
 ## Development
 
@@ -21,9 +26,9 @@ npm run build         # production build to dist/
 
 ## Adding business logic use cases
 
-1. Write a feature in `features/*.feature` describing the use case in Gherkin.
-2. Implement step definitions in `features/step_definitions/*.steps.ts`, calling into the logic under `src/logic/`.
-3. Implement/adjust the logic in `src/logic/` until the scenarios pass.
+1. Write a feature in `src/test/features/*.feature` describing the use case in Gherkin.
+2. Implement step definitions in `src/test/features/step_definitions/*.steps.ts`, calling into the logic under `src/main/logic/`.
+3. Implement/adjust the logic in `src/main/logic/` until the scenarios pass.
 
 ## Deployment
 
