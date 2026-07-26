@@ -6,7 +6,7 @@ Feature: Battle screen
 
   Scenario: The battle screen shows the deployed battle units
     Given the battle screen is displayed
-    Then the header shows "Player one turn - Round 1"
+    Then the header shows "Human turn - Round 1"
     And the ally battle unit is visible on the battlefield
     And the enemy battle unit is visible on the battlefield
 
@@ -18,14 +18,14 @@ Feature: Battle screen
 
   Scenario: Selecting an ability shows its target range and details
     Given the battle screen is displayed
-    And I select the ally battle unit
+    And I select the ally battle unit that is close to the enemy
     When I select the "Fire bolt" ability
     Then the ability details panel shows "Fire bolt"
     And the enemy tile is highlighted as a valid target
 
   Scenario: Casting an ability on a valid target damages it
     Given the battle screen is displayed
-    And I select the ally battle unit
+    And I select the ally battle unit that is close to the enemy
     And I select the "Fire bolt" ability
     When I target the enemy battle unit
     Then the enemy battle unit health is reduced
@@ -46,4 +46,4 @@ Feature: Battle screen
     Given the battle screen is displayed
     And I click "Finish my turn"
     When I click "Confirm I finished"
-    Then the header shows "Player one turn - Round 2"
+    Then the header shows "Human turn - Round 2"

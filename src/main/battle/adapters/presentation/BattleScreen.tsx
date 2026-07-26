@@ -6,8 +6,8 @@ import { DetailsPanel } from './DetailsPanel';
 import { FinishTurnControl } from './FinishTurnControl';
 
 const PLAYER_LABEL: Record<string, string> = {
-  'player-one': 'Player one',
-  'player-two': 'Player two',
+  'human-player': 'Human',
+  'cpu-player': 'CPU',
 };
 
 export function BattleScreen() {

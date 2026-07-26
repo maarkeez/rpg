@@ -13,6 +13,8 @@ export type BattleUnitAbility = {
   cooldownTurnsLeft: number;
 };
 
+const MANA_REGEN_RATE = 0.1;
+
 export class BattleUnit {
   readonly #id: string;
   readonly #unitId: string;
@@ -92,6 +94,7 @@ export class BattleUnit {
     }));
     this.#remainingMoveSteps = this.#movementRange;
     this.#canCastAbility = true;
+    this.#remainingMana = Math.min(this.#maxMana, this.#remainingMana + Math.round(this.#maxMana * MANA_REGEN_RATE));
   }
 
   public move(destination: Position): void {

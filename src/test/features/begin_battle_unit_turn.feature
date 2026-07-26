@@ -13,3 +13,10 @@ Feature: begin battle unit turn
     When the battle unit turn begins
     Then the battle unit movement remaining steps will be reset to the unit movement range
     And the cast ability turn action will be available
+
+  Scenario: increase mana
+    Given a battle unit
+    And the player turn has started
+    And the battle unit has spent some mana
+    When the battle unit turn begins
+    Then the battle unit remaining mana points will be increased by 10 percent of the unit maximum mana without exceeding the unit maximum

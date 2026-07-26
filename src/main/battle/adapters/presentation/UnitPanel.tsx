@@ -1,5 +1,5 @@
 import { useBattle } from './BattleContext';
-import { ABILITY_DEFINITIONS, UNIT_EMOJI } from './seedDemoGame';
+import { ABILITY_DEFINITIONS, UNIT_EMOJI, UNIT_NAME } from './seedDemoGame';
 
 export function UnitPanel() {
   const { selectedUnit, selectedAbilityId, selectAbility } = useBattle();
@@ -18,7 +18,7 @@ export function UnitPanel() {
   return (
     <section className="unit-panel">
       <div className="unit-portrait">{UNIT_EMOJI[selectedUnit.unitId] ?? '🧍'}</div>
-      <p className="unit-name">Goblin</p>
+      <p className="unit-name">{UNIT_NAME[selectedUnit.unitId] ?? selectedUnit.unitId}</p>
       <div className="unit-stats">
         <span>{healthPercent}% ❤️</span>
         <span>{manaPercent}% 🔋</span>

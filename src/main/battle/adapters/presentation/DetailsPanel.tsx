@@ -1,5 +1,5 @@
 import { useBattle } from './BattleContext';
-import { ABILITY_DEFINITIONS } from './seedDemoGame';
+import { ABILITY_DEFINITIONS, UNIT_NAME } from './seedDemoGame';
 
 export function DetailsPanel() {
   const { selectedUnit, selectedAbility, effectFor } = useBattle();
@@ -27,8 +27,7 @@ export function DetailsPanel() {
   if (selectedUnit) {
     return (
       <section className="details-panel">
-        <h3>Goblin</h3>
-        <p>Likes to stay in the dark</p>
+        <h3>{UNIT_NAME[selectedUnit.unitId] ?? selectedUnit.unitId}</h3>
         <p>
           <strong>Stats</strong>
         </p>

@@ -44,7 +44,14 @@ type BattleUiValue = BattleUiState & {
 
 const BattleUiContext = React.createContext<BattleUiValue | null>(null);
 
-export function BattleProvider({ children }: { children?: React.ReactNode }) {
+export function BattleProvider({
+  children,
+  initialGame,
+}: {
+  children?: React.ReactNode;
+  /** Injects a pre-seeded/pre-arranged game, bypassing seedDemoGame(). Intended for tests. */
+  initialGame?: DemoGame;
+}) {
   const [game, setGame] = useState<DemoGame | null>(null);
   const [state, setState] = useState<BattleUiState>({
     isReady: false,
@@ -59,35 +66,35 @@ export function BattleProvider({ children }: { children?: React.ReactNode }) {
   });
 
   const refresh = useCallback(async (currentGame: DemoGame) => {
-    const [battleUnits, battle, abilities, effects] = await Promise.all([
+    const [battleUnits, battle] = await Promise.all([
       currentGame.battleUnitRepository.searchAll(),
       currentGame.battleRepository.searchById(currentGame.battleId),
-      Promise.all(
-        (await currentGame.unitRepository.searchById('goblin-unit'))!.abilityIds.map((abilityId) =>
-          currentGame.abilityRepository.searchById(abilityId),
-        ),
-      ),
-      Promise.all(
-        (await currentGame.unitRepository.searchById('goblin-unit'))!.abilityIds.map(async (abilityId) => {
-          const ability = await currentGame.abilityRepository.searchById(abilityId);
-          return ability ? currentGame.effectRepository.searchById(ability.effectIds[0]) : null;
-        }),
-      ),
     ]);
+
+    const abilityIds = [
+      ...new Set(battleUnits.flatMap((battleUnit) => battleUnit.toDto().abilities.map((ability) => ability.abilityId))),
+    ];
+    const abilities = (
+      await Promise.all(abilityIds.map((abilityId) => currentGame.abilityRepository.searchById(abilityId)))
+    ).filter((ability): ability is NonNullable<typeof ability> => ability !== null);
+
+    const effects = (
+      await Promise.all(abilities.map((ability) => currentGame.effectRepository.searchById(ability.toDto().effectIds[0])))
+    ).filter((effect): effect is NonNullable<typeof effect> => effect !== null);
 
     setState((prev) => ({
       ...prev,
       isReady: true,
       battle: battle!.toDto(),
       battleUnits: battleUnits.map((battleUnit) => battleUnit.toDto()),
-      abilities: abilities.filter((ability): ability is NonNullable<typeof ability> => ability !== null).map((a) => a.toDto()),
-      effects: effects.filter((effect): effect is NonNullable<typeof effect> => effect !== null).map((e) => e.toDto()),
+      abilities: abilities.map((ability) => ability.toDto()),
+      effects: effects.map((effect) => effect.toDto()),
     }));
   }, []);
 
   useEffect(() => {
     let cancelled = false;
-    seedDemoGame().then((seededGame) => {
+    (initialGame ? Promise.resolve(initialGame) : seedDemoGame()).then((seededGame) => {
       if (cancelled) return;
       setGame(seededGame);
       refresh(seededGame);
@@ -95,7 +102,7 @@ export function BattleProvider({ children }: { children?: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [refresh]);
+  }, [refresh, initialGame]);
 
   const selectedUnit = useMemo(
     () => state.battleUnits.find((battleUnit) => battleUnit.id === state.selectedUnitId) ?? null,
