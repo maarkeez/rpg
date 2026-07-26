@@ -42,8 +42,8 @@ Feature: Battle screen
     Then I see "I am not done yet"
     And I see "Confirm I finished"
 
-  Scenario: Confirming the finished turn advances to the next player
+  Scenario: Confirming the finished turn lets the cpu player play and advances to the next round
     Given the battle screen is displayed
     And I click "Finish my turn"
     When I click "Confirm I finished"
-    Then the header shows "Player two turn - Round 1"
+    Then the header shows "Player one turn - Round 2"

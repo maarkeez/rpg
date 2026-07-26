@@ -9,6 +9,10 @@ import { type EffectDTO } from '../../../effect/domain';
 import { type BattleUnitDTO, type Position } from '../../../battleUnit/domain';
 import { BattleUnitMover } from '../../../battleUnit/usecases/commands/BattleUnitMover';
 import { AbilityCaster } from '../../../battleUnit/usecases/commands/AbilityCaster';
+import { PlayerType } from '../../../player/domain';
+import { CpuTurnPlayer } from '../../../cpuBrain/usecases/commands/CpuTurnPlayer';
+
+const MAX_CONSECUTIVE_CPU_TURNS = 10;
 
 type BattleUiState = {
   isReady: boolean;
@@ -188,10 +192,27 @@ export function BattleProvider({ children }: { children?: React.ReactNode }) {
     const playerTurnFinisher = new PlayerTurnFinisher(game.battleRepository, game.battleUnitRepository);
     await playerTurnFinisher.finish(game.battleId);
 
-    const battle = await game.battleRepository.searchById(game.battleId);
+    let battle = await game.battleRepository.searchById(game.battleId);
     if (battle?.toDto().roundFinished) {
       const roundStarter = new RoundStarter(game.battleRepository, game.battleUnitRepository);
       await roundStarter.startNextRound(game.battleId);
+    }
+
+    const cpuTurnPlayer = new CpuTurnPlayer(
+      game.battleRepository,
+      game.playerRepository,
+      game.battleUnitRepository,
+      game.abilityRepository,
+      game.effectRepository,
+      game.battlefieldRepository,
+      game.battlefieldId,
+    );
+
+    for (let i = 0; i < MAX_CONSECUTIVE_CPU_TURNS; i++) {
+      battle = await game.battleRepository.searchById(game.battleId);
+      const currentPlayer = battle ? await game.playerRepository.searchById(battle.toDto().currentPlayerTurn) : null;
+      if (currentPlayer?.toDto().type !== PlayerType.Cpu) break;
+      await cpuTurnPlayer.play(game.battleId);
     }
 
     setState((prev) => ({
