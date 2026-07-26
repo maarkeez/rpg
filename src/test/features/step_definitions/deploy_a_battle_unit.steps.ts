@@ -11,6 +11,10 @@ import { EffectCreator } from '../../../main/effect/usecases/commands/EffectCrea
 import { InMemoryEffectRepository } from '../../../main/effect/adapters/storage/InMemoryEffectRepository';
 import { PlayerCreator } from '../../../main/player/usecases/commands/PlayerCreator';
 import { InMemoryPlayerRepository } from '../../../main/player/adapters/storage/InMemoryPlayerRepository';
+import { InMemoryBattlefieldRepository } from '../../../main/battlefield/adapters/storage/InMemoryBattlefieldRepository';
+import { BattlefieldInitializer } from '../../../main/battlefield/usecases/commands/BattlefieldInitializer';
+
+const battlefieldId = 'battlefield-1';
 
 let battleUnitRepository: InMemoryBattleUnitRepository;
 let unitRepository: InMemoryUnitRepository;
@@ -24,7 +28,15 @@ Before(async function () {
   battleUnitRepository = new InMemoryBattleUnitRepository();
   unitRepository = new InMemoryUnitRepository();
   playerRepository = new InMemoryPlayerRepository();
-  battleUnitDeployer = new BattleUnitDeployer(battleUnitRepository, unitRepository, playerRepository);
+  const battlefieldRepository = new InMemoryBattlefieldRepository();
+  await new BattlefieldInitializer(battlefieldRepository).initializeUniform(battlefieldId, 8, 8, 'plains');
+  battleUnitDeployer = new BattleUnitDeployer(
+    battleUnitRepository,
+    unitRepository,
+    playerRepository,
+    battlefieldRepository,
+    battlefieldId,
+  );
 
   const effectRepository = new InMemoryEffectRepository();
   const abilityRepository = new InMemoryAbilityRepository();

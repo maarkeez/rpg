@@ -16,6 +16,9 @@ import { type BattleUnitRepository } from '../../../battleUnit/domain';
 import { InMemoryBattleRepository } from '../storage/InMemoryBattleRepository';
 import { FirstRoundStarter } from '../../usecases/commands/FirstRoundStarter';
 import { type BattleRepository } from '../../domain';
+import { InMemoryBattlefieldRepository } from '../../../battlefield/adapters/storage/InMemoryBattlefieldRepository';
+import { BattlefieldInitializer } from '../../../battlefield/usecases/commands/BattlefieldInitializer';
+import { type BattlefieldRepository } from '../../../battlefield/domain';
 
 export const BATTLEFIELD_ROWS = 8;
 export const BATTLEFIELD_COLS = 8;
@@ -35,6 +38,7 @@ export const UNIT_EMOJI: Record<string, string> = {
 
 export type DemoGame = {
   battleId: string;
+  battlefieldId: string;
   playerOneId: string;
   playerTwoId: string;
   allyBattleUnitId: string;
@@ -45,6 +49,7 @@ export type DemoGame = {
   playerRepository: PlayerRepository;
   battleUnitRepository: BattleUnitRepository;
   battleRepository: BattleRepository;
+  battlefieldRepository: BattlefieldRepository;
 };
 
 export async function seedDemoGame(): Promise<DemoGame> {
@@ -54,6 +59,14 @@ export async function seedDemoGame(): Promise<DemoGame> {
   const playerRepository = new InMemoryPlayerRepository();
   const battleUnitRepository = new InMemoryBattleUnitRepository();
   const battleRepository = new InMemoryBattleRepository();
+  const battlefieldRepository = new InMemoryBattlefieldRepository();
+  const battlefieldId = 'battlefield-1';
+  await new BattlefieldInitializer(battlefieldRepository).initializeUniform(
+    battlefieldId,
+    BATTLEFIELD_ROWS,
+    BATTLEFIELD_COLS,
+    'plains',
+  );
 
   const effectCreator = new EffectCreator(effectRepository);
   const abilityCreator = new AbilityCreator(abilityRepository, effectRepository);
@@ -89,7 +102,13 @@ export async function seedDemoGame(): Promise<DemoGame> {
   await playerCreator.create('player-one', 'human', 'Player one');
   await playerCreator.create('player-two', 'cpu', 'Player two');
 
-  const battleUnitDeployer = new BattleUnitDeployer(battleUnitRepository, unitRepository, playerRepository);
+  const battleUnitDeployer = new BattleUnitDeployer(
+    battleUnitRepository,
+    unitRepository,
+    playerRepository,
+    battlefieldRepository,
+    battlefieldId,
+  );
   await battleUnitDeployer.deploy('ally-battle-unit', 'goblin-unit', 'player-one', { row: 6, col: 3 });
   await battleUnitDeployer.deploy('enemy-battle-unit', 'goblin-unit', 'player-two', { row: 5, col: 3 });
 
@@ -97,6 +116,7 @@ export async function seedDemoGame(): Promise<DemoGame> {
 
   return {
     battleId: 'battle-1',
+    battlefieldId,
     playerOneId: 'player-one',
     playerTwoId: 'player-two',
     allyBattleUnitId: 'ally-battle-unit',
@@ -107,5 +127,6 @@ export async function seedDemoGame(): Promise<DemoGame> {
     playerRepository,
     battleUnitRepository,
     battleRepository,
+    battlefieldRepository,
   };
 }

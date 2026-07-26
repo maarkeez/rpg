@@ -11,12 +11,17 @@ import { EffectCreator } from '../../../main/effect/usecases/commands/EffectCrea
 import { InMemoryEffectRepository } from '../../../main/effect/adapters/storage/InMemoryEffectRepository';
 import { PlayerCreator } from '../../../main/player/usecases/commands/PlayerCreator';
 import { InMemoryPlayerRepository } from '../../../main/player/adapters/storage/InMemoryPlayerRepository';
+import { InMemoryBattlefieldRepository } from '../../../main/battlefield/adapters/storage/InMemoryBattlefieldRepository';
+import { BattlefieldInitializer } from '../../../main/battlefield/usecases/commands/BattlefieldInitializer';
+
+const battlefieldId = 'battlefield-1';
 
 let battleUnitRepository: InMemoryBattleUnitRepository;
 let unitRepository: InMemoryUnitRepository;
 let playerRepository: InMemoryPlayerRepository;
 let abilityRepository: InMemoryAbilityRepository;
 let effectRepository: InMemoryEffectRepository;
+let battlefieldRepository: InMemoryBattlefieldRepository;
 let battleUnitDeployer: BattleUnitDeployer;
 let abilityCaster: AbilityCaster;
 
@@ -29,8 +34,23 @@ Before(async function () {
   playerRepository = new InMemoryPlayerRepository();
   abilityRepository = new InMemoryAbilityRepository();
   effectRepository = new InMemoryEffectRepository();
-  battleUnitDeployer = new BattleUnitDeployer(battleUnitRepository, unitRepository, playerRepository);
-  abilityCaster = new AbilityCaster(battleUnitRepository, abilityRepository, effectRepository, () => 0);
+  battlefieldRepository = new InMemoryBattlefieldRepository();
+  await new BattlefieldInitializer(battlefieldRepository).initializeUniform(battlefieldId, 8, 8, 'plains');
+  battleUnitDeployer = new BattleUnitDeployer(
+    battleUnitRepository,
+    unitRepository,
+    playerRepository,
+    battlefieldRepository,
+    battlefieldId,
+  );
+  abilityCaster = new AbilityCaster(
+    battleUnitRepository,
+    abilityRepository,
+    effectRepository,
+    battlefieldRepository,
+    battlefieldId,
+    () => 0,
+  );
 
   await new EffectCreator(effectRepository).create('damage-effect', 'DealDamage', 0, 20, 100);
   await new AbilityCreator(abilityRepository, effectRepository).create(

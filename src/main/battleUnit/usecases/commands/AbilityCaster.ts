@@ -11,6 +11,8 @@ import {
 } from '../../domain';
 import { TargetPattern, type AbilityRepository } from '../../../ability/domain';
 import { type EffectRepository } from '../../../effect/domain';
+import { type BattlefieldRepository } from '../../../battlefield/domain';
+import { BattleUnitBattlefieldRemover } from '../../../battlefield/usecases/commands/BattleUnitBattlefieldRemover';
 
 function targetsMatchPattern(caster: BattleUnit, targets: BattleUnit[], pattern: TargetPattern): boolean {
   if (pattern === TargetPattern.Self) {
@@ -26,6 +28,8 @@ export class AbilityCaster {
     readonly battleUnitRepository: BattleUnitRepository,
     readonly abilityRepository: AbilityRepository,
     readonly effectRepository: EffectRepository,
+    readonly battlefieldRepository: BattlefieldRepository,
+    readonly battlefieldId: string,
     readonly rng: () => number = Math.random,
   ) {}
 
@@ -55,7 +59,9 @@ export class AbilityCaster {
 
     caster.payAbilityCost(abilityId, ability.cost, ability.cooldown);
 
+    const battlefieldRemover = new BattleUnitBattlefieldRemover(this.battlefieldRepository);
     for (const target of targets) {
+      const wasAlreadyDefeated = target.isDefeated;
       for (const effectId of ability.effectIds) {
         const effect = await this.effectRepository.searchById(effectId);
         if (!effect) continue;
@@ -64,6 +70,10 @@ export class AbilityCaster {
         }
       }
       await this.battleUnitRepository.update(target);
+
+      if (!wasAlreadyDefeated && target.isDefeated) {
+        await battlefieldRemover.remove(this.battlefieldId, target.position);
+      }
     }
 
     await this.battleUnitRepository.update(caster);

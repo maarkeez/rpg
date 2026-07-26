@@ -12,10 +12,15 @@ import { EffectCreator } from '../../../main/effect/usecases/commands/EffectCrea
 import { InMemoryEffectRepository } from '../../../main/effect/adapters/storage/InMemoryEffectRepository';
 import { PlayerCreator } from '../../../main/player/usecases/commands/PlayerCreator';
 import { InMemoryPlayerRepository } from '../../../main/player/adapters/storage/InMemoryPlayerRepository';
+import { InMemoryBattlefieldRepository } from '../../../main/battlefield/adapters/storage/InMemoryBattlefieldRepository';
+import { BattlefieldInitializer } from '../../../main/battlefield/usecases/commands/BattlefieldInitializer';
+
+const battlefieldId = 'battlefield-1';
 
 let battleUnitRepository: InMemoryBattleUnitRepository;
 let abilityRepository: InMemoryAbilityRepository;
 let effectRepository: InMemoryEffectRepository;
+let battlefieldRepository: InMemoryBattlefieldRepository;
 let battleUnitTurnStarter: BattleUnitTurnStarter;
 
 const battleUnitId = 'battle-unit-1';
@@ -26,7 +31,10 @@ Before(async function () {
   const playerRepository = new InMemoryPlayerRepository();
   abilityRepository = new InMemoryAbilityRepository();
   effectRepository = new InMemoryEffectRepository();
+  battlefieldRepository = new InMemoryBattlefieldRepository();
   battleUnitTurnStarter = new BattleUnitTurnStarter(battleUnitRepository);
+
+  await new BattlefieldInitializer(battlefieldRepository).initializeUniform(battlefieldId, 8, 8, 'plains');
 
   await new EffectCreator(effectRepository).create('heal-effect', 'Heal', 0, 5, 100);
   await new AbilityCreator(abilityRepository, effectRepository).create(
@@ -40,7 +48,7 @@ Before(async function () {
   await new UnitCreator(unitRepository, abilityRepository).create('default-unit', 'Goblin', 100, 50, ['self-heal'], 3);
   await new PlayerCreator(playerRepository).create('default-player', 'human', 'Player One');
 
-  await new BattleUnitDeployer(battleUnitRepository, unitRepository, playerRepository).deploy(
+  await new BattleUnitDeployer(battleUnitRepository, unitRepository, playerRepository, battlefieldRepository, battlefieldId).deploy(
     battleUnitId,
     'default-unit',
     'default-player',
@@ -57,7 +65,14 @@ Given('the player turn has started', function () {
 });
 
 Given('the battle unit has an ability in cooldown', async function () {
-  const abilityCaster = new AbilityCaster(battleUnitRepository, abilityRepository, effectRepository, () => 0);
+  const abilityCaster = new AbilityCaster(
+    battleUnitRepository,
+    abilityRepository,
+    effectRepository,
+    battlefieldRepository,
+    battlefieldId,
+    () => 0,
+  );
   await abilityCaster.cast(battleUnitId, 'self-heal', [battleUnitId]);
 });
 

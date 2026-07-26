@@ -122,7 +122,13 @@ export function BattleProvider({ children }: { children?: React.ReactNode }) {
         if (!isValidTarget) return;
         const target = findBattleUnitAt(state.battleUnits, position);
         const targetId = target ? target.id : selectedUnit.id;
-        const abilityCaster = new AbilityCaster(game.battleUnitRepository, game.abilityRepository, game.effectRepository);
+        const abilityCaster = new AbilityCaster(
+          game.battleUnitRepository,
+          game.abilityRepository,
+          game.effectRepository,
+          game.battlefieldRepository,
+          game.battlefieldId,
+        );
         abilityCaster
           .cast(selectedUnit.id, selectedAbility.id, [targetId])
           .then(() => {
@@ -136,7 +142,7 @@ export function BattleProvider({ children }: { children?: React.ReactNode }) {
       if (selectedUnit) {
         const isValidMove = moveRangeTiles.some((tile) => tile.row === position.row && tile.col === position.col);
         if (isValidMove) {
-          const battleUnitMover = new BattleUnitMover(game.battleUnitRepository);
+          const battleUnitMover = new BattleUnitMover(game.battleUnitRepository, game.battlefieldRepository, game.battlefieldId);
           battleUnitMover
             .move(selectedUnit.id, position)
             .then(() => {

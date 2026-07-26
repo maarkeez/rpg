@@ -12,8 +12,13 @@ import { EffectCreator } from '../../../main/effect/usecases/commands/EffectCrea
 import { InMemoryEffectRepository } from '../../../main/effect/adapters/storage/InMemoryEffectRepository';
 import { PlayerCreator } from '../../../main/player/usecases/commands/PlayerCreator';
 import { InMemoryPlayerRepository } from '../../../main/player/adapters/storage/InMemoryPlayerRepository';
+import { InMemoryBattlefieldRepository } from '../../../main/battlefield/adapters/storage/InMemoryBattlefieldRepository';
+import { BattlefieldInitializer } from '../../../main/battlefield/usecases/commands/BattlefieldInitializer';
+
+const battlefieldId = 'battlefield-1';
 
 let battleUnitRepository: InMemoryBattleUnitRepository;
+let battlefieldRepository: InMemoryBattlefieldRepository;
 let battleUnitMover: BattleUnitMover;
 
 const battleUnitId = 'battle-unit-1';
@@ -26,7 +31,9 @@ Before(async function () {
   const playerRepository = new InMemoryPlayerRepository();
   const abilityRepository = new InMemoryAbilityRepository();
   const effectRepository = new InMemoryEffectRepository();
-  battleUnitMover = new BattleUnitMover(battleUnitRepository);
+  battlefieldRepository = new InMemoryBattlefieldRepository();
+  await new BattlefieldInitializer(battlefieldRepository).initializeUniform(battlefieldId, 8, 8, 'plains');
+  battleUnitMover = new BattleUnitMover(battleUnitRepository, battlefieldRepository, battlefieldId);
 
   await new EffectCreator(effectRepository).create('default-effect', 'Heal', 0, 10, 100);
   await new AbilityCreator(abilityRepository, effectRepository).create(
@@ -47,12 +54,13 @@ Before(async function () {
   );
   await new PlayerCreator(playerRepository).create('default-player', 'human', 'Player One');
 
-  await new BattleUnitDeployer(battleUnitRepository, unitRepository, playerRepository).deploy(
-    battleUnitId,
-    'default-unit',
-    'default-player',
-    { row: 0, col: 0 },
-  );
+  await new BattleUnitDeployer(
+    battleUnitRepository,
+    unitRepository,
+    playerRepository,
+    battlefieldRepository,
+    battlefieldId,
+  ).deploy(battleUnitId, 'default-unit', 'default-player', { row: 0, col: 0 });
 
   destination = { row: 0, col: 1 };
   error = undefined;
@@ -97,12 +105,13 @@ Given('the destination position can not be occupied', async function () {
     3,
   );
   await new PlayerCreator(playerRepository).create('blocker-player', 'human', 'Player Two');
-  await new BattleUnitDeployer(battleUnitRepository, unitRepository, playerRepository).deploy(
-    'blocker-battle-unit',
-    'blocker-unit',
-    'blocker-player',
-    destination,
-  );
+  await new BattleUnitDeployer(
+    battleUnitRepository,
+    unitRepository,
+    playerRepository,
+    battlefieldRepository,
+    battlefieldId,
+  ).deploy('blocker-battle-unit', 'blocker-unit', 'blocker-player', destination);
 });
 
 When('moving the battle unit', async function () {

@@ -12,6 +12,10 @@ import { InMemoryEffectRepository } from '../../../main/effect/adapters/storage/
 import { PlayerCreator } from '../../../main/player/usecases/commands/PlayerCreator';
 import { InMemoryPlayerRepository } from '../../../main/player/adapters/storage/InMemoryPlayerRepository';
 import { EffectType } from '../../../main/effect/domain';
+import { InMemoryBattlefieldRepository } from '../../../main/battlefield/adapters/storage/InMemoryBattlefieldRepository';
+import { BattlefieldInitializer } from '../../../main/battlefield/usecases/commands/BattlefieldInitializer';
+
+const battlefieldId = 'battlefield-1';
 
 let battleUnitRepository: InMemoryBattleUnitRepository;
 let effectReceiver: AbilityEffectReceiver;
@@ -27,6 +31,8 @@ Before(async function () {
   const playerRepository = new InMemoryPlayerRepository();
   const abilityRepository = new InMemoryAbilityRepository();
   const effectRepository = new InMemoryEffectRepository();
+  const battlefieldRepository = new InMemoryBattlefieldRepository();
+  await new BattlefieldInitializer(battlefieldRepository).initializeUniform(battlefieldId, 8, 8, 'plains');
   effectReceiver = new AbilityEffectReceiver(battleUnitRepository);
 
   await new EffectCreator(effectRepository).create('default-effect', 'Heal', 0, 10, 100);
@@ -48,7 +54,13 @@ Before(async function () {
   );
   await new PlayerCreator(playerRepository).create('default-player', 'human', 'Player One');
 
-  await new BattleUnitDeployer(battleUnitRepository, unitRepository, playerRepository).deploy(
+  await new BattleUnitDeployer(
+    battleUnitRepository,
+    unitRepository,
+    playerRepository,
+    battlefieldRepository,
+    battlefieldId,
+  ).deploy(
     targetId,
     'default-unit',
     'default-player',
