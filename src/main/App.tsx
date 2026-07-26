@@ -1,10 +1,11 @@
-import { getGreeting } from './logic/greeting';
+import { BattleProvider } from './battle/adapters/presentation/BattleContext';
+import { BattleScreen } from './battle/adapters/presentation/BattleScreen';
 
 function App() {
   return (
-    <main>
-      <h1>{getGreeting()}</h1>
-    </main>
+    <BattleProvider>
+      <BattleScreen />
+    </BattleProvider>
   );
 }
 

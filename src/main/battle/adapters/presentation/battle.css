@@ -1,0 +1,165 @@
+.battle-screen {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 16px;
+  font-family: system-ui, sans-serif;
+}
+
+.battle-header {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.battlefield {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.tile {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  background: #e5e5e5;
+  border: 2px solid #bbb;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.tile.occupied-ally {
+  border-color: #3b82f6;
+}
+
+.tile.occupied-enemy {
+  border-color: #ef4444;
+}
+
+.tile.selected {
+  border-color: #f97316;
+  border-width: 3px;
+}
+
+.tile.move-range {
+  background: #bbf7d0;
+}
+
+.tile.target-range {
+  background: #fecaca;
+}
+
+.bottom-panels {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.unit-panel {
+  flex: 1;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.unit-portrait {
+  font-size: 2.5rem;
+  text-align: center;
+}
+
+.unit-name {
+  text-align: center;
+  font-weight: bold;
+}
+
+.unit-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.85rem;
+  margin: 8px 0;
+}
+
+.ability-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.ability-icon {
+  font-size: 1.3rem;
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+}
+
+.ability-icon.selected {
+  border-color: #eab308;
+  border-width: 2px;
+}
+
+.ability-icon:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.details-panel {
+  flex: 1;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.details-panel h3 {
+  margin: 0 0 8px;
+}
+
+.finish-turn-button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #3b82f6;
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.finish-turn-confirmation {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.not-done-button {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: white;
+  color: #999;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.confirm-finish-button {
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background: #ef4444;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.action-error {
+  color: #ef4444;
+  font-size: 0.85rem;
+  text-align: center;
+  margin-bottom: 8px;
+}
