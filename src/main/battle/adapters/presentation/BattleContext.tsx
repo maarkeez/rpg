@@ -2,7 +2,8 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { seedDemoGame, BATTLEFIELD_ROWS, BATTLEFIELD_COLS, type DemoGame } from './seedDemoGame';
 import { abilityTargetTiles, findBattleUnitAt, movementRangeTiles } from './battlefieldGeometry';
 import { type BattleDTO } from '../../domain';
-import { TurnAdvancer } from '../../usecases/commands/TurnAdvancer';
+import { PlayerTurnFinisher } from '../../usecases/commands/PlayerTurnFinisher';
+import { RoundStarter } from '../../usecases/commands/RoundStarter';
 import { type AbilityDTO } from '../../../ability/domain';
 import { type EffectDTO } from '../../../effect/domain';
 import { type BattleUnitDTO, type Position } from '../../../battleUnit/domain';
@@ -178,8 +179,15 @@ export function BattleProvider({ children }: { children?: React.ReactNode }) {
 
   const confirmFinishTurn = useCallback(async () => {
     if (!game) return;
-    const turnAdvancer = new TurnAdvancer(game.battleRepository, game.battleUnitRepository);
-    await turnAdvancer.advance(game.battleId);
+    const playerTurnFinisher = new PlayerTurnFinisher(game.battleRepository, game.battleUnitRepository);
+    await playerTurnFinisher.finish(game.battleId);
+
+    const battle = await game.battleRepository.searchById(game.battleId);
+    if (battle?.toDto().roundFinished) {
+      const roundStarter = new RoundStarter(game.battleRepository, game.battleUnitRepository);
+      await roundStarter.startNextRound(game.battleId);
+    }
+
     setState((prev) => ({
       ...prev,
       isConfirmingFinishTurn: false,

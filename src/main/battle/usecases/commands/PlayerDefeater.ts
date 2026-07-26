@@ -1,5 +1,6 @@
 import { BattleNotFound, BattlePlayerStillHasUnitsAlive, type BattleRepository } from '../../domain';
 import { type BattleUnitRepository } from '../../../battleUnit/domain';
+import { beginPlayerBattleUnitsTurn } from './beginPlayerBattleUnitsTurn';
 
 export class PlayerDefeater {
   constructor(
@@ -15,7 +16,13 @@ export class PlayerDefeater {
     const hasUnitsAlive = playerBattleUnits.some((battleUnit) => !battleUnit.isDefeated);
     if (hasUnitsAlive) throw new BattlePlayerStillHasUnitsAlive();
 
+    const previousCurrentPlayerTurn = battle.currentPlayerTurn;
     battle.defeatPlayer(playerId);
     await this.battleRepository.update(battle);
+
+    const battleDto = battle.toDto();
+    if (!battleDto.roundFinished && battleDto.currentPlayerTurn !== previousCurrentPlayerTurn) {
+      await beginPlayerBattleUnitsTurn(this.battleUnitRepository, battleDto.currentPlayerTurn);
+    }
   }
 }

@@ -35,3 +35,15 @@ export class BattlePlayerStillHasUnitsAlive extends BattleError {
     super('BattlePlayerStillHasUnitsAlive', 'The player still has battle units alive');
   }
 }
+
+export class BattleRoundNotFinished extends BattleError {
+  constructor() {
+    super('BattleRoundNotFinished', 'The current round has not finished yet');
+  }
+}
+
+export class BattleNotReadyToFinish extends BattleError {
+  constructor() {
+    super('BattleNotReadyToFinish', 'The battle turn queue must contain a single player to finish the battle');
+  }
+}
